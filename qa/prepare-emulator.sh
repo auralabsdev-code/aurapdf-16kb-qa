@@ -26,17 +26,26 @@ test "$license_status" -eq 0
 "$ANDROID_HOME/emulator/emulator" -accel-check | tee evidence/kvm.txt
 grep -qi 'KVM.*usable' evidence/kvm.txt
 cp "$ANDROID_HOME/system-images/android-36/google_apis_ps16k/x86_64/package.xml" evidence/image-package.xml
-printf 'no\n' | "$AVDMANAGER" create avd --name AuraPDF14_CI_16K --package "$IMAGE" --device pixel_4
-cp "$HOME/.android/avd/AuraPDF14_CI_16K.avd/config.ini" evidence/avd-config-before.ini
-python3 - <<'EOF'
+: "${ANDROID_AVD_HOME:?Explicit AVD directory is required}"
+mkdir -p "$ANDROID_AVD_HOME"
+AVD_DIR="$ANDROID_AVD_HOME/AuraPDF14_CI_16K.avd"
+AVD_CONFIG="$AVD_DIR/config.ini"
+printf 'no\n' | "$AVDMANAGER" create avd --name AuraPDF14_CI_16K --package "$IMAGE" --device pixel_4 --path "$AVD_DIR"
+"$AVDMANAGER" list avd > evidence/avd-list.txt
+test -f "$AVD_CONFIG"
+realpath "$AVD_CONFIG" | tee evidence/avd-config-path.txt
+cp "$AVD_CONFIG" evidence/avd-config-before.ini
+python3 - "$AVD_CONFIG" <<'EOF'
 from pathlib import Path
-path = Path.home() / '.android/avd/AuraPDF14_CI_16K.avd/config.ini'
+import sys
+
+path = Path(sys.argv[1])
 updates = {'hw.ramSize': '3072', 'hw.cpu.ncore': '2', 'hw.lcd.width': '1080',
            'hw.lcd.height': '2280', 'hw.lcd.density': '440', 'disk.dataPartition.size': '4G'}
 lines = [line for line in path.read_text().splitlines() if line.split('=', 1)[0].strip() not in updates]
 path.write_text('\n'.join(lines + [f'{key}={value}' for key, value in updates.items()]) + '\n')
 EOF
-cp "$HOME/.android/avd/AuraPDF14_CI_16K.avd/config.ini" evidence/avd-config.ini
+cp "$AVD_CONFIG" evidence/avd-config.ini
 "$ANDROID_HOME/emulator/emulator" -version > evidence/emulator-version.txt 2>&1
 "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --print-certs inputs/app/build14.apk > evidence/app-signature.txt
 "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --print-certs inputs/tests/build14-androidTest.apk > evidence/test-signature.txt
