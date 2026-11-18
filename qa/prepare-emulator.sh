@@ -10,6 +10,9 @@ sudo chmod a+rw /dev/kvm
 test -r /dev/kvm && test -w /dev/kvm
 free -b > evidence/host-before.txt
 df -B1 . >> evidence/host-before.txt
+sudo apt-get update
+sudo apt-get install -y --no-install-recommends libpulse0
+ldconfig -p | grep -E '^[[:space:]]*libpulse\.so\.0[[:space:]]' | tee evidence/libpulse.txt
 # Live availability is checked again by the actual SDK manager on this runner.
 "$SDKMANAGER" --list > evidence/sdk-packages.txt
 grep -F "$IMAGE" evidence/sdk-packages.txt
@@ -46,7 +49,7 @@ lines = [line for line in path.read_text().splitlines() if line.split('=', 1)[0]
 path.write_text('\n'.join(lines + [f'{key}={value}' for key, value in updates.items()]) + '\n')
 EOF
 cp "$AVD_CONFIG" evidence/avd-config.ini
-"$ANDROID_HOME/emulator/emulator" -version > evidence/emulator-version.txt 2>&1
+"$ANDROID_HOME/emulator/emulator" -version 2>&1 | tee evidence/emulator-version.txt
 "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --print-certs inputs/app/build14.apk > evidence/app-signature.txt
 "$ANDROID_HOME/build-tools/36.1.0/apksigner" verify --print-certs inputs/tests/build14-androidTest.apk > evidence/test-signature.txt
 grep -F '24b196b94e3474070eec1e3927f671fec24c1fdd01ed48008d7130f463de355f' evidence/app-signature.txt

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       approval:
-        description: 'Approved second AuraPDF qualification: type BUILD14-PUBLIC-SECOND-RUN'
+        description: 'Approved third AuraPDF qualification: type BUILD14-PUBLIC-THIRD-RUN'
         required: true
         type: string
 
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Enforce authorized second dispatch
+      - name: Enforce authorized third dispatch
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -43,10 +43,10 @@ jobs:
           mkdir -p evidence
           test "$REPOSITORY_PRIVATE" = false
           test "$RUN_ATTEMPT" = 1
-          test "$APPROVAL" = BUILD14-PUBLIC-SECOND-RUN
-          # Count the original failed dispatch and this one. Reject any additional run.
+          test "$APPROVAL" = BUILD14-PUBLIC-THIRD-RUN
+          # Count the two prior dispatches and this one. Reject any additional run.
           gh api "repos/$REPOSITORY/actions/workflows/aurapdf-build14-16kb.yml/runs?event=workflow_dispatch&per_page=1" > evidence/dispatches.json
-          python3 -c 'import json; d=json.load(open("evidence/dispatches.json")); assert d["total_count"] == 2, "Only the original and one new dispatch are authorized"'
+          python3 -c 'import json; d=json.load(open("evidence/dispatches.json")); assert d["total_count"] == 3, "Only two prior dispatches and one new dispatch are authorized"'
       - name: Verify immutable local inputs
         run: python3 qa/runner.py --verify-only
       - name: Prepare KVM and verify official 16KB image availability
