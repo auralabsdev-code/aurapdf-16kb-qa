@@ -1,0 +1,10 @@
+{
+  "app_sha256": "53a5cb13fbf17da626e07a4171e988a789d8bab16d56dffc01bd327aa8cb1d32",
+  "test_sha256": "7f7adf500784c5cf656ace6a5e77a0d986e264493af4a4ec162eb6814adaa8c2",
+  "files": {
+    "inputs/app/build14.apk": "53a5cb13fbf17da626e07a4171e988a789d8bab16d56dffc01bd327aa8cb1d32",
+    "inputs/fixtures/A_Igual.pdf": "92e9af8e105afcd989627b762ae2b56a4aef3a4fc489cb78ea4d493f54dbd1c2",
+    "inputs/fixtures/B_Igual.pdf": "58561f161277796c6d5f625584e15d52b351aa6cf8f9074a2d96bbfcf61e1125",
+    "inputs/tests/build14-androidTest.apk": "7f7adf500784c5cf656ace6a5e77a0d986e264493af4a4ec162eb6814adaa8c2"
+  }
+}
